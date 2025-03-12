@@ -114,7 +114,7 @@ export default function SignIn({ setView }) {
         <span style={{ color: "#A4A1A1" }}> | </span>
         <button
           className="font-semibold outline-none cursor-pointer"
-          onClick={() => setView("SIGNIN")}
+          onClick={() => setView("SIGNUP")}
           style={{ color: "#026DFF" }}
         >
           가입하기
