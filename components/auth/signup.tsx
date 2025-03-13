@@ -17,7 +17,7 @@ export default function SignUp({ setView }) {
 
   return (
     <div className="flex flex-col gap-1 ">
-      <header className="w-full bg-white py-4 fixed top-0 left-0 z-10">
+      <header className="w-full bg-white  fixed top-0 left-0 z-10">
         <div className="flex items-center justify-between px-10 py-5 border-b border-gray-200">
           <img
             src="/images/tickit_logo.png"
@@ -28,7 +28,7 @@ export default function SignUp({ setView }) {
           <span>정보입력</span>
         </div>
       </header>
-      <div className="pt-20 px-10 w-full flex flex-col items-center justify-center max-w-lg bg-white">
+      <div className="pt-23 px-10 w-full flex flex-col items-center justify-center max-w-lg bg-white">
         <InputField
           label="아이디"
           id="id"

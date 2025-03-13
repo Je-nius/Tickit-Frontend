@@ -16,7 +16,7 @@ const InputField: React.FC<InputFieldProps> = ({
   placeholder,
 }) => {
   return (
-    <div className="w-full mb-4">
+    <div className="w-full mb-3">
       <label
         htmlFor={id}
         className="inline-block text-lg font-medium text-gray-700 mr-4"
@@ -29,7 +29,7 @@ const InputField: React.FC<InputFieldProps> = ({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full h-12 px-4 text-lg outline-none border-b-2 border-gray-400"
+        className="w-full h-8 px-4 text-lg outline-none border-b-2 border-gray-400"
       />
     </div>
   );
