@@ -92,7 +92,7 @@ export default function Qna() {
       </div>
       <div className="mt-4 w-full flex justify-center">
         <button
-          className="w-50 h-8 text-md rounded-sm text-lg font-medium cursor-pointer "
+          className="w-50 h-10 text-md rounded-sm text-lg font-medium cursor-pointer "
           style={{ backgroundColor: "#026DFF", color: "white" }}
           onClick={onSaveQna}
         >

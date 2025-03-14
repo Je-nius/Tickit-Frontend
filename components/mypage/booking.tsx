@@ -31,9 +31,9 @@ export default function Booking() {
       <div className="mt-2 w-full flex justify-center">
         <BookingTable bookings={bookings} />
       </div>
-      <div className="ml-20 mt-4 w-full flex justify-center">
+      <div className="mt-4 w-full flex justify-center ml-10">
         <button
-          className="w-30 h-8 text-md rounded-sm text-lg font-medium cursor-pointer "
+          className="w-50 h-10 text-md rounded-sm text-lg font-medium cursor-pointer "
           style={{ backgroundColor: "#026DFF", color: "white" }}
         >
           더보기
