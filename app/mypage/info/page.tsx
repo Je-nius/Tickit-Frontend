@@ -4,7 +4,7 @@ import Info from "components/mypage/info";
 
 export default function MyPageInfo() {
   return (
-    <div className="w-full h-screen flex pt-16">
+    <div className="w-full h-screen flex pt-16 lg:fixed">
       <MypageHeader />
       <MypageSidebar />
 

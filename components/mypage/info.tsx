@@ -2,7 +2,7 @@
 
 export default function Info() {
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 mt-5">
+    <div className="w-full max-w-4xl mx-auto p-4">
       <h1 className="font-bold text-2xl">기본정보</h1>
       <div className="flex flex-col gap-4 mt-4 border border-gray-400 p-4 rounded-lg">
         <h1 className="text-lg font-semibold text-gray-500">이름</h1>
