@@ -18,7 +18,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const loggedIn = false;
+  const loggedIn = true;
   return (
     <html lang="en">
       <head>
