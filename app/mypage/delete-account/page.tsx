@@ -1,7 +1,16 @@
-export default async function MyPage() {
+import MypageHeader from "components/layouts/MypageHeader";
+import MypageSidebar from "components/layouts/MypageSidebar";
+import Delete from "components/mypage/delete";
+
+export default async function MyPageDelete() {
   return (
-    <div className="w-full h-screen flex justify-center items-center">
-      <h1 className="font-bold text-2xl">My Page 안에 회원 탈퇴하기</h1>
+    <div className="w-full h-screen flex pt-16 lg:fixed">
+      <MypageHeader />
+      <MypageSidebar />
+
+      <div className="flex-1 flex justify-center mt-14">
+        <Delete />
+      </div>
     </div>
   );
 }
