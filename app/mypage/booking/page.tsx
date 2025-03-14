@@ -1,7 +1,16 @@
-export default async function MyPage() {
+import MypageHeader from "components/layouts/MypageHeader";
+import MypageSidebar from "components/layouts/MypageSidebar";
+import Booking from "components/mypage/booking";
+
+export default function MypageBooking() {
   return (
-    <div className="w-full h-screen flex justify-center items-center">
-      <h1 className="font-bold text-2xl">마이페이지에서 예매확인</h1>
+    <div className="w-full h-screen flex pt-16 ">
+      <MypageHeader />
+      <MypageSidebar />
+
+      <div className="flex-1 flex justify-center mr-35 mt-5">
+        <Booking />
+      </div>
     </div>
   );
 }
