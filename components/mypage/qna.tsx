@@ -1,5 +1,6 @@
 "use client";
 
+import SubmitButton from "components/layouts/SubmitButton";
 import { useState } from "react";
 
 export default function Qna() {
@@ -90,15 +91,8 @@ export default function Qna() {
           />
         </form>
       </div>
-      <div className="mt-4 w-full flex justify-center">
-        <button
-          className="w-50 h-10 text-md rounded-sm text-lg font-medium cursor-pointer "
-          style={{ backgroundColor: "#026DFF", color: "white" }}
-          onClick={onSaveQna}
-        >
-          문의하기
-        </button>
-      </div>
+
+      <SubmitButton onClick={onSaveQna} text="등록하기" />
     </div>
   );
 }
