@@ -1,7 +1,16 @@
+import Create from "components/admin/create";
+import AdminSidebar from "components/layouts/AdminSidebar";
+import MypageHeader from "components/layouts/MypageHeader";
+
 export default async function MyPage() {
   return (
-    <div className="w-full h-screen flex justify-center items-center">
-      <h1 className="font-bold text-2xl">관리자 - 공연 생성</h1>
+    <div className="w-full h-screen flex pt-16 ">
+      <MypageHeader />
+      <AdminSidebar />
+
+      <div className="flex-1 flex justify-center mt-5">
+        <Create />
+      </div>
     </div>
   );
 }
