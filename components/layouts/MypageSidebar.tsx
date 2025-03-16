@@ -10,11 +10,11 @@ export default function MypageSidebar() {
     const isActive = pathname === href;
     return `${
       isActive ? "bg-[#D9D9D9] text-[#026DFF]" : ""
-    } text-xl font-bold p-3 rounded-md`;
+    } text-sm md:text-xl font-bold p-3 rounded-md`;
   };
 
   return (
-    <aside className="h-screen p-5 border-r border-gray-300 flex flex-col justify-between w-64 sticky mt-5">
+    <aside className="h-screen p-5 border-r border-gray-300 flex flex-col justify-between w-64 sticky mt-5 ">
       <div className="flex flex-col gap-5">
         <Link href="/mypage/info" legacyBehavior>
           <a className={getLinkClassName("/mypage/info")}>기본정보</a>
