@@ -1,3 +1,7 @@
+import HomeHeader from "components/layouts/HomeHeader";
+import HomeNav from "components/home/HomeNav";
+import HomeUI from "./HomeUI";
+
 export default function Home() {
-  return <h1 className="text-3xl font-bold underline">Hello world!</h1>;
+  return <HomeUI />;
 }
