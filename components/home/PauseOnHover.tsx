@@ -9,7 +9,8 @@ function PauseOnHover() {
     dots: true,
     infinite: true,
     centerMode: true,
-    centerPadding: "60px",
+    centerPadding: "100px",
+    margin: "50px",
     slidesToShow: 4,
     slidesToScroll: 1,
     autoplay: true,
@@ -21,14 +22,14 @@ function PauseOnHover() {
         breakpoint: 1024,
         settings: {
           slidesToShow: 3,
-          centerPadding: "50px",
+          centerPadding: "100px",
         },
       },
       {
         breakpoint: 768,
         settings: {
           slidesToShow: 2,
-          centerPadding: "40px",
+          centerPadding: "50px",
         },
       },
       {
@@ -43,22 +44,22 @@ function PauseOnHover() {
   return (
     <div className="slider-container">
       <Slider {...settings}>
-        <div className="w-full h-auto">
+        <div className="w-full h-auto px-3">
           <img src={"/images/glow.png"} />
         </div>
-        <div className="w-full h-auto">
+        <div className="w-full h-auto px-3">
           <img src={"/images/peak.jpeg"} />
         </div>
-        <div className="w-full h-auto">
+        <div className="w-full h-auto px-3">
           <img src={"/images/seoul.jpeg"} />
         </div>
-        <div className="w-full h-auto">
+        <div className="w-full h-auto px-3">
           <img src={"/images/madison.jpeg"} />
         </div>
-        <div className="w-full h-auto">
+        <div className="w-full h-auto px-3">
           <img src={"/images/peak.jpeg"} />
         </div>
-        <div className="w-full h-auto">
+        <div className="w-full h-auto px-3">
           <img src={"/images/seoul.jpeg"} />
         </div>
       </Slider>

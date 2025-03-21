@@ -1,5 +1,6 @@
 "use client";
 
+import SubmitButton from "components/layouts/SubmitButton";
 import { useState } from "react";
 
 export default function ChangePW() {
@@ -34,6 +35,7 @@ export default function ChangePW() {
           확인
         </button>
       </div>
+      {/* <SubmitButton onClick={onSavePerformance} text="등록하기" /> */}
     </div>
   );
 }

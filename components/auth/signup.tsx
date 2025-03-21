@@ -14,6 +14,9 @@ export default function SignUp({ setView }) {
   const handleEmailVerification = () => {
     console.log("이메일 인증하기");
   };
+  const handleIDsearch = () => {
+    console.log("중복 아이디 조회");
+  };
 
   return (
     <div className="flex flex-col gap-1 ">
@@ -29,12 +32,14 @@ export default function SignUp({ setView }) {
         </div>
       </header>
       <div className="pt-23 px-10 w-full flex flex-col items-center justify-center max-w-lg bg-white">
-        <InputField
+        <AuthButton
           label="아이디"
           id="id"
           value={id}
           onChange={(e) => setId(e.target.value)}
           placeholder="6 ~ 12자 영문, 숫자"
+          buttonText="중복조회"
+          onButtonClick={handleIDsearch}
         />
 
         <InputField
