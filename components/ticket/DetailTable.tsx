@@ -1,5 +1,7 @@
 "use client";
 
+import SubmitButton from "components/layouts/SubmitButton";
+import Popup from "components/popup/popup";
 import { useEffect, useState } from "react";
 
 export default function DetailTable() {
@@ -9,10 +11,22 @@ export default function DetailTable() {
   const [endDate, setEndDate] = useState("");
   const [poster, setPoster] = useState("");
 
+  const HandleTicketing = () => {
+    const popup = window.open(
+      "http://localhost:3000/popup",
+      "_blank",
+      "width=1000,height=600"
+    );
+
+    if (popup) {
+      popup.focus();
+    }
+  };
+
   // 사진, 제목, 장소, 공연기간, 공연시간, 가격 서버에서 받아오기
   useEffect(() => {
     async function fetchData() {
-      const response = await fetch("/api/ticket/detail");
+      const response = await fetch("http://localhost:3000/api/contents/detail");
       const data = await response.json();
       setTitle(data.title);
       setLocation(data.location);
@@ -26,7 +40,7 @@ export default function DetailTable() {
 
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center ">
-      <div className="flex flex-row justify-center mt-30 w-full max-w-4xl bg-white p-8 rounded-lg shadow-md">
+      <div className="flex flex-row justify-center mt-24 2xl:mt-10 w-full max-w-4xl bg-white p-6 rounded-md shadow-md">
         <img src={poster || "/images/peak.jpeg"} className="w-46 h-65" />
         <div className="flex flex-col gap-2 justify-center">
           <div>
@@ -76,7 +90,7 @@ export default function DetailTable() {
 
       <div
         id="ticketing_process_box"
-        className="w-full max-w-4xl p-3 bg-white rounded-lg shadow-md border border-gray-300"
+        className="w-full max-w-4xl p-3 bg-white rounded-md shadow-md border border-gray-300"
       >
         <div className="wrap_ticketing_process w-full p-5 flex space-x-8">
           <div className="box_ticketing_process flex-1">
@@ -140,9 +154,6 @@ export default function DetailTable() {
 
           <div className="box_ticketing_process flex-1">
             <dl className="seat_choice">
-              <dt className="tit_process tit_seat_choice text-lg font-bold mb-4">
-                <span>좌석 선택</span>
-              </dt>
               <dd className="cont_process">
                 <div className="box_type_list">
                   <p className="mb-2 font-semibold">선택한 회차별 좌석 현황</p>
@@ -170,6 +181,15 @@ export default function DetailTable() {
               </dd>
             </dl>
           </div>
+        </div>
+        <div className="w-full flex flex-col justify-center items-center">
+          <button
+            className="px-24 h-10 text-md rounded-sm text-lg font-medium cursor-pointer mr-5 ml-auto"
+            style={{ backgroundColor: "#026DFF", color: "white" }}
+            onClick={HandleTicketing}
+          >
+            예매하기
+          </button>
         </div>
       </div>
     </div>
