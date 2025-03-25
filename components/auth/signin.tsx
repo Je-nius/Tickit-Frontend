@@ -7,13 +7,39 @@ import {
   Lock,
 } from "@mui/icons-material";
 
+interface SignInInterface {
+  id: string;
+  password: string;
+}
+
 export default function SignIn({ setView }) {
-  const [id, setId] = useState("");
-  const [password, setPassword] = useState("");
+  const [id, setId] = useState<SignInInterface["id"]>("");
+  const [password, setPassword] = useState<SignInInterface["password"]>("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const Loginbtn = (e) => {
+    e.preventDefault();
+    fetch("http://localhost:3000/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        login_id: id,
+        password: password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("로그인 성공:", result);
+      })
+      .catch((error) => {
+        console.error("로그인 실패:", error);
+      });
   };
 
   return (
@@ -78,7 +104,7 @@ export default function SignIn({ setView }) {
 
         <button
           onClick={() => {
-            console.log("signin");
+            Loginbtn;
           }}
           className="w-full mt-4 h-12 text-md rounded-md text-xl cursor-pointer"
           style={{ backgroundColor: "#026DFF", color: "white" }}

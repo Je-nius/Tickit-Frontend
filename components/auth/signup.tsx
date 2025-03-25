@@ -2,20 +2,76 @@ import { useState } from "react";
 import InputField from "./InputField";
 import AuthButton from "./AuthButton";
 
+interface SignUpInterface {
+  id: string;
+  password: string;
+  name: string;
+  phone: string;
+  email: string;
+  birth: Date;
+}
+
 export default function SignUp({ setView }) {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
-  const [re_password, setRePassword] = useState("");
   const [name, setName] = useState("");
+  const [birth, setBirth] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
+  const [usableid, setUsableID] = useState(false);
 
-  const handleEmailVerification = () => {
-    console.log("이메일 인증하기");
+  const idValidation = () => {
+    fetch("http://localhost:3000/api/verify/id", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        login_id: id,
+      }),
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          setUsableID(true);
+        }
+      })
+      .catch((error) => {
+        console.log("아이디 중복", error);
+      });
   };
-  const handleIDsearch = () => {
-    console.log("중복 아이디 조회");
+
+  const handleSignUp = (e) => {
+    const birthDate = new Date(birth);
+    const signUpData: SignUpInterface = {
+      id,
+      password,
+      name,
+      phone,
+      email,
+      birth: birthDate,
+    };
+    e.preventDefault();
+    fetch("http://localhost:3000/api/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        login_id: signUpData.id,
+        password: signUpData.password,
+        username: signUpData.name,
+        phone_number: signUpData.phone,
+        email: signUpData.email,
+        birth: signUpData.birth,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("회원가입 성공:", result);
+      })
+      .catch((error) => {
+        console.error("회원가입 실패:", error);
+      });
   };
 
   return (
@@ -39,7 +95,7 @@ export default function SignUp({ setView }) {
           onChange={(e) => setId(e.target.value)}
           placeholder="6 ~ 12자 영문, 숫자"
           buttonText="중복조회"
-          onButtonClick={handleIDsearch}
+          onButtonClick={idValidation}
         />
 
         <InputField
@@ -47,14 +103,6 @@ export default function SignUp({ setView }) {
           id="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="6 ~ 12자 영문, 숫자"
-        />
-
-        <InputField
-          label="비밀번호 확인"
-          id="password"
-          value={re_password}
-          onChange={(e) => setRePassword(e.target.value)}
           placeholder="6 ~ 12자 영문, 숫자"
         />
 
@@ -67,6 +115,15 @@ export default function SignUp({ setView }) {
         />
 
         <InputField
+          label="생년월일"
+          id="birth"
+          value={birth}
+          onChange={(e) => setBirth(e.target.value)}
+          placeholder="20000228"
+          type="date"
+        />
+
+        <InputField
           label="전화번호"
           id="phone"
           value={phone}
@@ -74,27 +131,17 @@ export default function SignUp({ setView }) {
           placeholder="010 1234 5678"
         />
 
-        <AuthButton
+        <InputField
           label="이메일"
           id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="tickit@naver.com"
-          buttonText="인증하기"
-          onButtonClick={handleEmailVerification}
-        />
-
-        <InputField
-          label="인증번호"
-          id="otp"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value)}
-          placeholder="123456"
         />
 
         <button
           onClick={() => {
-            console.log("signin");
+            handleSignUp;
           }}
           className="w-full mt-4 h-12 text-md rounded-md text-xl cursor-pointer"
           style={{ backgroundColor: "#026DFF", color: "white" }}
