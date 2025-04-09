@@ -18,7 +18,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const loggedIn = true;
   return (
     <html lang="en">
       <head>
@@ -34,7 +33,7 @@ export default async function RootLayout({
       <body className={inter.className}>
         <ReactQueryClientProviders>
           <ThemeProvider>
-            {loggedIn ? <MainLayout>{children}</MainLayout> : <Auth />}
+            <Auth>{children}</Auth>
           </ThemeProvider>
         </ReactQueryClientProviders>
       </body>

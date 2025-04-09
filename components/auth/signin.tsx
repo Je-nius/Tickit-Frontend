@@ -6,15 +6,13 @@ import {
   AccountCircle,
   Lock,
 } from "@mui/icons-material";
-
-interface SignInInterface {
-  id: string;
-  password: string;
-}
+import { components } from "src/types/schema";
+type SignInRequest = components["schemas"]["LoginRequestDto"];
+type SignInResponse = components["schemas"]["TokenResponse"];
 
 export default function SignIn({ setView }) {
-  const [id, setId] = useState<SignInInterface["id"]>("");
-  const [password, setPassword] = useState<SignInInterface["password"]>("");
+  const [id, setId] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleClickShowPassword = () => {
@@ -22,30 +20,41 @@ export default function SignIn({ setView }) {
   };
 
   const Loginbtn = (e) => {
+    const signInData: SignInRequest = {
+      loginId: id,
+      password,
+    };
     e.preventDefault();
-    fetch("http://localhost:3000/api/login", {
+    fetch("http://localhost:8080/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        login_id: id,
-        password: password,
-      }),
+      body: JSON.stringify(signInData),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("로그인 실패");
+        }
+        return response.json();
+      })
+
       .then((result) => {
         console.log("로그인 성공:", result);
+        localStorage.setItem("accessToken", result.accessToken);
+        localStorage.setItem("refreshToken", result.refreshToken);
+        window.location.href = "/";
       })
       .catch((error) => {
-        console.error("로그인 실패:", error);
+        console.error("로그인 실패:", error.message || error);
+        alert("아이디 또는 비밀번호를 다시 확인해주세요.");
       });
   };
 
   return (
     <div className="flex flex-col gap-1">
       <div className="pt-10 pb-6 px-10 w-full flex flex-col items-center justify-center max-w-lg bg-white">
-        <img src={"/images/tickit_logo.png"} className="w-60 mb-6" />
+        <img src={"/images/tickit-logo.png"} className="w-60 mb-6" />
 
         <TextField
           placeholder="아이디"

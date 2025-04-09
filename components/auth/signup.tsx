@@ -1,15 +1,10 @@
 import { useState } from "react";
 import InputField from "./InputField";
 import AuthButton from "./AuthButton";
+import { components } from "src/types/schema";
 
-interface SignUpInterface {
-  id: string;
-  password: string;
-  name: string;
-  phone: string;
-  email: string;
-  birth: Date;
-}
+type SignUpRequest = components["schemas"]["UserCreateRequestDto"];
+type SignUpResponse = components["schemas"]["UserCreateResponseDto"];
 
 export default function SignUp({ setView }) {
   const [id, setId] = useState("");
@@ -21,13 +16,13 @@ export default function SignUp({ setView }) {
   const [usableid, setUsableID] = useState(false);
 
   const idValidation = () => {
-    fetch("http://localhost:3000/api/verify/id", {
+    fetch("http://localhost:8080/api/verify/id", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        login_id: id,
+        loginId: id,
       }),
     })
       .then((response) => {
@@ -41,31 +36,31 @@ export default function SignUp({ setView }) {
   };
 
   const handleSignUp = (e) => {
-    const birthDate = new Date(birth);
-    const signUpData: SignUpInterface = {
-      id,
+    const signUpData: SignUpRequest = {
+      loginId: id,
       password,
-      name,
-      phone,
+      username: name,
       email,
-      birth: birthDate,
+      birth,
+      phoneNumber: phone,
     };
     e.preventDefault();
-    fetch("http://localhost:3000/api/signup", {
+    fetch("http://localhost:8080/api/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        login_id: signUpData.id,
-        password: signUpData.password,
-        username: signUpData.name,
-        phone_number: signUpData.phone,
-        email: signUpData.email,
-        birth: signUpData.birth,
-      }),
+      body: JSON.stringify(signUpData),
     })
-      .then((response) => response.json())
+      .then(async (response) => {
+        console.log("응답 상태코드:", response.status);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("회원가입 실패 응답 본문:", errorText);
+          throw new Error("회원가입 실패");
+        }
+        return response.json() as Promise<SignUpResponse>;
+      })
       .then((result) => {
         console.log("회원가입 성공:", result);
       })
@@ -79,7 +74,7 @@ export default function SignUp({ setView }) {
       <header className="w-full bg-white  fixed top-0 left-0 z-10">
         <div className="flex items-center justify-between px-10 py-5 border-b border-gray-200">
           <img
-            src="/images/tickit_logo.png"
+            src="/images/tickit-logo.png"
             alt="Logo"
             className="w-40  cursor-pointer"
             onClick={() => setView("SIGNIN")}
@@ -140,9 +135,7 @@ export default function SignUp({ setView }) {
         />
 
         <button
-          onClick={() => {
-            handleSignUp;
-          }}
+          onClick={handleSignUp}
           className="w-full mt-4 h-12 text-md rounded-md text-xl cursor-pointer"
           style={{ backgroundColor: "#026DFF", color: "white" }}
         >
