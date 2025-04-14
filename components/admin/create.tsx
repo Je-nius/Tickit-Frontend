@@ -4,32 +4,76 @@ import { useState } from "react";
 import InputField from "./AdminInput";
 import ImageUpload from "./ImageUpload";
 import SubmitButton from "components/layouts/SubmitButton";
+import { components } from "src/types/schema";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
 export default function Create() {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [genre, setGenre] = useState("");
+  const [genre, setGenre] = useState<Genre>("CONCERT");
   const [location, setLocation] = useState("");
   const [runningTime, setRunningTime] = useState("");
   const [startTime, setStartTime] = useState("");
   const [availableSeats, setAvailableSeats] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("/images/default-img.png");
+  const [seatZones, setSeatZones] = useState<UISeatZone[]>([
+    { zoneName: "", seatCount: 0, zoneType: "STANDARD" },
+  ]);
+  const GENRE_OPTIONS = ["CONCERT", "MUSICAL", "FESTIVAL", "SPORTS"] as const;
+  const [typePrices, setTypePrices] = useState<{
+    VIP: number;
+    STANDARD: number;
+  }>({ VIP: 0, STANDARD: 0 });
+  const [schedules, setSchedules] = useState<PerformanceScheduleDto[]>([
+    { performanceDate: "", startTime: { hour: 0, minute: 0 } },
+  ]);
+
+  type PerformanceScheduleDto = components["schemas"]["PerformanceScheduleDto"];
+  type PerformanceCreateRequest =
+    components["schemas"]["PerformanceCreateRequestDto"];
+  type SeatConfig = components["schemas"]["SeatCreateDto"];
+  type Genre = (typeof GENRE_OPTIONS)[number];
+  type UISeatZone = {
+    zoneName: string;
+    seatCount: number;
+    zoneType: "VIP" | "STANDARD";
+  };
+
+  const generateSeatConfig = () => {
+    const seatConfig: SeatConfig = {
+      zoneSeatNumber: {},
+      zoneType: {},
+      typePrice: {
+        VIP: typePrices.VIP,
+        STANDARD: typePrices.STANDARD,
+      },
+    };
+
+    seatZones.forEach((zone) => {
+      const { zoneName, seatCount, zoneType } = zone;
+      seatConfig.zoneSeatNumber![zoneName] = seatCount;
+      seatConfig.zoneType![zoneName] = zoneType as "VIP" | "STANDARD";
+    });
+
+    return seatConfig;
+  };
 
   const onSavePerformance = () => {
+    const seatConfig = generateSeatConfig();
     const formData = new FormData();
-    const datas = {
-      title: title,
-      artist: artist,
-      startDate: startDate,
-      endDate: endDate,
-      genre: genre,
-      location: location,
-      runningTime: runningTime,
-      startTime: startTime,
-      availableSeats: availableSeats,
+    const datas: PerformanceCreateRequest = {
+      title,
+      // artist: artist,
+      startDate,
+      endDate,
+      genre,
+      location,
+      runningTime: Number(runningTime),
+      schedules,
+      seatConfig,
     };
     formData.append(
       "PostDto",
@@ -44,7 +88,7 @@ export default function Create() {
       body: formData,
     })
       .then((res) => {
-        console.log("공연 등록 성공" + res);
+        console.log(res + "공연 등록 성공");
       })
       .catch((err) => {
         console.log(err + "공연 등록 오류");
@@ -78,41 +122,21 @@ export default function Create() {
               />
             </div>
             <div className="flex flex-col w-1/2">
-              <InputField
-                label="장르"
+              <label className="text-lg font-semibold mb-1">장르</label>
+              <select
+                className="h-12 px-4 text-lg outline-none border border-gray-300 rounded-md"
                 value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-                placeholder="K-POP"
-              />
+                onChange={(e) => setGenre(e.target.value as Genre)}
+              >
+                {GENRE_OPTIONS.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="flex gap-4">
-            <div className="flex flex-col w-1/2">
-              <InputField
-                label="시작 날짜"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                type="date"
-              />
-            </div>
-            <div className="flex flex-col w-1/2">
-              <InputField
-                label="종료 날짜"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                type="date"
-              />
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex flex-col w-1/2">
-              <InputField
-                label="시작 시간"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                type="time"
-              />
-            </div>
             <div className="flex flex-col w-1/2">
               <InputField
                 label="관람 시간"
@@ -121,8 +145,6 @@ export default function Create() {
                 placeholder="150(분)"
               />
             </div>
-          </div>
-          <div className="flex gap-4">
             <div className="flex flex-col w-1/2">
               <InputField
                 label="공연장"
@@ -131,12 +153,178 @@ export default function Create() {
                 placeholder="체조경기장"
               />
             </div>
-            <div className="flex flex-col w-1/2">
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <label className="text-lg font-semibold">공연 일정</label>
+            {schedules.map((schedule, index) => (
+              <div key={index} className="flex gap-2">
+                <div className="flex flex-col w-1/2">
+                  <label className="text-sm font-medium mb-1">날짜</label>
+                  <input
+                    type="date"
+                    value={schedule.performanceDate || ""}
+                    onChange={(e) => {
+                      const newSchedules = [...schedules];
+                      newSchedules[index].performanceDate = e.target.value;
+                      setSchedules(newSchedules);
+                    }}
+                    className="h-12 px-4 text-lg outline-none border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div className="flex flex-col w-1/2">
+                  <label className="text-sm font-medium mb-1">시간</label>
+                  <input
+                    type="time"
+                    value={`${
+                      schedule.startTime?.hour?.toString().padStart(2, "0") ||
+                      "00"
+                    }:${
+                      schedule.startTime?.minute?.toString().padStart(2, "0") ||
+                      "00"
+                    }`}
+                    onChange={(e) => {
+                      const [hour, minute] = e.target.value
+                        .split(":")
+                        .map(Number);
+                      const newSchedules = [...schedules];
+                      newSchedules[index].startTime = { hour, minute };
+                      setSchedules(newSchedules);
+                    }}
+                    className="h-12 px-4 text-lg outline-none border border-gray-300 rounded-md"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newSchedules = schedules.filter(
+                      (_, i) => i !== index
+                    );
+                    setSchedules(newSchedules);
+                  }}
+                  className="text-red-500 w-8 mt-6"
+                >
+                  <RemoveCircleOutlineIcon />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setSchedules([
+                  ...schedules,
+                  { performanceDate: "", startTime: { hour: 0, minute: 0 } },
+                ])
+              }
+              className="text-blue-600 mt-2"
+            >
+              + 일정 추가
+            </button>
+          </div>
+
+          <div className="flex gap-4">
+            {/* <div className="flex flex-col w-1/2">
               <InputField
                 label="이용 가능한 좌석 수"
                 value={availableSeats}
                 onChange={(e) => setAvailableSeats(e.target.value)}
                 placeholder="20000(석)"
+              />
+            </div> */}
+          </div>
+          {seatZones.map((zone, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <div className="w-1/3">
+                <InputField
+                  label="구역명"
+                  value={zone.zoneName}
+                  onChange={(e) => {
+                    const newZones = [...seatZones];
+                    newZones[index].zoneName = e.target.value;
+                    setSeatZones(newZones);
+                  }}
+                  placeholder="A"
+                />
+              </div>
+              <div className="w-1/3">
+                <InputField
+                  label="좌석 수"
+                  value={zone.seatCount.toString()}
+                  onChange={(e) => {
+                    const newZones = [...seatZones];
+                    newZones[index].seatCount = Number(e.target.value);
+                    setSeatZones(newZones);
+                  }}
+                  type="number"
+                  placeholder="200"
+                />
+              </div>
+              <div className="w-1/3 flex flex-col">
+                <label className="text-lg font-semibold mb-1">구역 타입</label>
+                <select
+                  className="h-12 px-4 text-lg outline-none border border-gray-300 rounded-md"
+                  value={zone.zoneType}
+                  onChange={(e) => {
+                    const newZones = [...seatZones];
+                    newZones[index].zoneType = e.target.value as
+                      | "VIP"
+                      | "STANDARD";
+                    setSeatZones(newZones);
+                  }}
+                >
+                  <option value="VIP">VIP</option>
+                  <option value="STANDARD">STANDARD</option>
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const newZones = seatZones.filter((_, i) => i !== index);
+                  setSeatZones(newZones);
+                }}
+                className="mt-6 text-red-500 w-10"
+              >
+                <RemoveCircleOutlineIcon />
+              </button>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() =>
+              setSeatZones([
+                ...seatZones,
+                { zoneName: "", seatCount: 0, zoneType: "STANDARD" },
+              ])
+            }
+            className="text-blue-600 mt-2"
+          >
+            + 구역 추가
+          </button>
+          <div className="flex gap-4 mt-4">
+            <div className="flex flex-col w-1/2">
+              <InputField
+                label="VIP 가격"
+                value={typePrices.VIP.toString()}
+                onChange={(e) =>
+                  setTypePrices({ ...typePrices, VIP: Number(e.target.value) })
+                }
+                placeholder="150000"
+                type="number"
+              />
+            </div>
+            <div className="flex flex-col w-1/2">
+              <InputField
+                label="STANDARD 가격"
+                value={typePrices.STANDARD.toString()}
+                onChange={(e) =>
+                  setTypePrices({
+                    ...typePrices,
+                    STANDARD: Number(e.target.value),
+                  })
+                }
+                placeholder="80000"
+                type="number"
               />
             </div>
           </div>
