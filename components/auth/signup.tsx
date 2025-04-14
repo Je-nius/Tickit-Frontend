@@ -1,10 +1,11 @@
 import { useState } from "react";
 import InputField from "./InputField";
 import AuthButton from "./AuthButton";
-import { components } from "src/types/schema";
+import { components, operations } from "src/types/schema";
 
 type SignUpRequest = components["schemas"]["UserCreateRequestDto"];
 type SignUpResponse = components["schemas"]["UserCreateResponseDto"];
+type VerifyLoginIdOperation = operations["verifyLoginId"];
 
 export default function SignUp({ setView }) {
   const [id, setId] = useState("");
@@ -22,16 +23,21 @@ export default function SignUp({ setView }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        loginId: id,
+        loginId: id, //verifyLoginId
       }),
     })
       .then((response) => {
+        console.log(response.status);
         if (response.status === 200) {
           setUsableID(true);
+          alert("사용 가능한 아이디입니다.");
+        } else if (response.status === 400) {
+          setUsableID(false);
+          alert("사용 불가능한 아이디입니다.");
         }
       })
       .catch((error) => {
-        console.log("아이디 중복", error);
+        console.log("중복조회 오류", error);
       });
   };
 

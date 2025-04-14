@@ -112,9 +112,7 @@ export default function SignIn({ setView }) {
         />
 
         <button
-          onClick={() => {
-            Loginbtn;
-          }}
+          onClick={Loginbtn}
           className="w-full mt-4 h-12 text-md rounded-md text-xl cursor-pointer"
           style={{ backgroundColor: "#026DFF", color: "white" }}
         >
