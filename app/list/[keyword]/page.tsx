@@ -3,14 +3,22 @@ import SearchList from "components/list/SearchList";
 
 export default async function ListPage({
   params,
+  searchParams,
 }: {
-  params: { keyword: string };
+  params: Promise<{ keyword: string }>;
+
+  searchParams: { type?: string };
 }) {
-  const resolvedParams = await params;
+  const keyword = (await params).keyword;
+  const isGenre = (await searchParams).type === "genre";
+
   return (
-    <div className="w-full h-screen flex flex-col">
+    <div className="w-full min-h-screen flex flex-col">
       <HomeHeader />
-      <SearchList params={resolvedParams} />
+
+      <div className="flex-1 flex flex-col mt-20">
+        <SearchList keyword={keyword} isGenre={isGenre} />
+      </div>
     </div>
   );
 }
