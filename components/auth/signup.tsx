@@ -17,27 +17,33 @@ export default function SignUp({ setView }) {
   const [usableid, setUsableID] = useState(false);
 
   const idValidation = () => {
-    fetch("http://localhost:8080/api/verify/id", {
+    fetch("/api/verify/id", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        loginId: id, //verifyLoginId
+        loginId: id,
       }),
     })
       .then((response) => {
-        console.log(response.status);
-        if (response.status === 200) {
+        if (!response.ok) {
+          throw new Error("서버 응답 오류");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("서버 응답:", data);
+        if (data.available) {
           setUsableID(true);
           alert("사용 가능한 아이디입니다.");
-        } else if (response.status === 400) {
+        } else {
           setUsableID(false);
-          alert("사용 불가능한 아이디입니다.");
+          alert("이미 사용 중인 아이디입니다.");
         }
       })
       .catch((error) => {
-        console.log("중복조회 오류", error);
+        console.error("중복조회 오류", error);
       });
   };
 
@@ -51,7 +57,7 @@ export default function SignUp({ setView }) {
       phoneNumber: phone,
     };
     e.preventDefault();
-    fetch("http://localhost:8080/api/signup", {
+    fetch("/api/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -59,7 +65,6 @@ export default function SignUp({ setView }) {
       body: JSON.stringify(signUpData),
     })
       .then(async (response) => {
-        console.log("응답 상태코드:", response.status);
         if (!response.ok) {
           const errorText = await response.text();
           console.error("회원가입 실패 응답 본문:", errorText);
@@ -69,6 +74,7 @@ export default function SignUp({ setView }) {
       })
       .then((result) => {
         console.log("회원가입 성공:", result);
+        window.location.href = "/";
       })
       .catch((error) => {
         console.error("회원가입 실패:", error);

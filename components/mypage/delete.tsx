@@ -17,6 +17,32 @@ export default function Delete() {
     setShowPassword(!showPassword);
   };
 
+  const deleteAccount = (e) => {
+    e.preventDefault();
+    const deleteData = {
+      password: password,
+    };
+
+    fetch("/api/delete", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(deleteData),
+    })
+      .then((response) => {
+        if (response.ok) {
+          alert("회원탈퇴가 완료되었습니다.");
+          window.location.href = "/";
+        } else {
+          alert("회원탈퇴에 실패했습니다.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <h1 className="font-bold text-2xl">회원탈퇴</h1>
@@ -48,6 +74,7 @@ export default function Delete() {
       </div>
       <div className="mt-4 w-full flex justify-center">
         <button
+          onClick={deleteAccount}
           className="w-50 h-10 text-md rounded-sm text-lg font-medium cursor-pointer "
           style={{ backgroundColor: "#026DFF", color: "white" }}
         >

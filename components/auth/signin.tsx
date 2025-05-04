@@ -7,6 +7,7 @@ import {
   Lock,
 } from "@mui/icons-material";
 import { components } from "src/types/schema";
+import { jwtDecode } from "jwt-decode";
 type SignInRequest = components["schemas"]["LoginRequestDto"];
 type SignInResponse = components["schemas"]["TokenResponse"];
 
@@ -25,7 +26,7 @@ export default function SignIn({ setView }) {
       password,
     };
     e.preventDefault();
-    fetch("http://localhost:8080/api/login", {
+    fetch("api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -43,7 +44,15 @@ export default function SignIn({ setView }) {
         console.log("로그인 성공:", result);
         localStorage.setItem("accessToken", result.accessToken);
         localStorage.setItem("refreshToken", result.refreshToken);
-        window.location.href = "/";
+        const decoded = jwtDecode<{ sub: string; Auth: string; exp: number }>(
+          result.accessToken
+        );
+
+        if (decoded.Auth === "ROLE_ADMIN") {
+          window.location.href = "/admin/create-performance";
+        } else {
+          window.location.href = "/";
+        }
       })
       .catch((error) => {
         console.error("로그인 실패:", error.message || error);
