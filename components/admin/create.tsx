@@ -10,13 +10,9 @@ import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 export default function Create() {
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [genre, setGenre] = useState<Genre>("CONCERT");
   const [location, setLocation] = useState("");
   const [runningTime, setRunningTime] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [availableSeats, setAvailableSeats] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("/images/default-img.png");
   const [seatZones, setSeatZones] = useState<UISeatZone[]>([
@@ -61,34 +57,83 @@ export default function Create() {
     return seatConfig;
   };
 
+  const formattedSchedules = schedules.map((s) => ({
+    performanceDate: s.performanceDate,
+    startTime: `${String(s.startTime.hour).padStart(2, "0")}:${String(
+      s.startTime.minute
+    ).padStart(2, "0")}`,
+  }));
+
   const onSavePerformance = () => {
+    let calculatedStartDate = "";
+    let calculatedEndDate = "";
+    if (schedules.length > 0) {
+      const dates = schedules
+        .map((s) => s.performanceDate)
+        .filter((d) => d)
+        .sort();
+
+      if (dates.length > 0) {
+        calculatedStartDate = dates[0];
+        calculatedEndDate = dates[dates.length - 1];
+      }
+    }
     const seatConfig = generateSeatConfig();
     const formData = new FormData();
     const datas: PerformanceCreateRequest = {
       title,
-      // artist: artist,
-      startDate,
-      endDate,
+      artists: artist,
+      startDate: calculatedStartDate,
+      endDate: calculatedEndDate,
       genre,
       location,
       runningTime: Number(runningTime),
-      schedules,
+      schedules: formattedSchedules as any,
       seatConfig,
     };
+
+    //console.log("보내는 데이터:", file);
+    console.log("보내는 데이터:", datas);
+
     formData.append(
-      "PostDto",
+      "createRequestDto",
       new Blob([JSON.stringify(datas)], {
         type: "application/json",
       })
     );
-    if (file) formData.append("files", file);
+    if (file) formData.append("poster", file);
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      alert("로그인이 필요합니다!");
+      return;
+    }
 
-    fetch("http://localhost:8080/api/contents/create", {
+    fetch("/api/contents/create", {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
       body: formData,
     })
       .then((res) => {
-        console.log(res + "공연 등록 성공");
+        console.log(res);
+        if (res.ok) {
+          alert("공연 등록이 완료되었습니다!");
+          setTitle("");
+          setArtist("");
+          setGenre("CONCERT");
+          setLocation("");
+          setRunningTime("");
+          setFile(null);
+          setPreview("/images/default-img.png");
+          setSeatZones([{ zoneName: "", seatCount: 0, zoneType: "STANDARD" }]);
+          setTypePrices({ VIP: 0, STANDARD: 0 });
+          setSchedules([
+            { performanceDate: "", startTime: { hour: 0, minute: 0 } },
+          ]);
+        } else {
+          alert("공연 등록에 실패했습니다.");
+        }
       })
       .catch((err) => {
         console.log(err + "공연 등록 오류");
