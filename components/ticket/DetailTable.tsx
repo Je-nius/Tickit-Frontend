@@ -1,17 +1,44 @@
 "use client";
 
-import SubmitButton from "components/layouts/SubmitButton";
-import Popup from "components/popup/popup";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { components } from "src/types/schema";
+
+type PerformanceDetailResponseDto =
+  components["schemas"]["PerformanceDetailResponseDto"];
+type ScheduleWithSeatsDto = components["schemas"]["ScheduleWithSeatsDto"];
 
 export default function DetailTable() {
+  const [data, setData] = useState<PerformanceDetailResponseDto | null>(null);
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [poster, setPoster] = useState("");
+  const [artist, setArtist] = useState("");
+  const [genre, setGenre] = useState("");
+  const [runningTime, setRunningTime] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [showTimes, setShowTimes] = useState([]);
+
+  const performanceDetail = data;
+
+  const params = useParams();
+  const performanceId = params.performanceId;
 
   const HandleTicketing = () => {
+    const selectedData = {
+      date: selectedDate,
+      time: selectedTime,
+      title: title,
+      seats: selectedSeats.map((seat) => ({
+        seatType: seat.seatType,
+        price: seat.price,
+      })),
+    };
+    localStorage.setItem("selectedData", JSON.stringify(selectedData));
+
     const popup = window.open(
       "http://localhost:3000/popup",
       "_blank",
@@ -23,25 +50,118 @@ export default function DetailTable() {
     }
   };
 
-  // 사진, 제목, 장소, 공연기간, 공연시간, 가격 서버에서 받아오기
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetch("http://localhost:3000/api/contents/detail");
-      const data = await response.json();
-      setTitle(data.title);
-      setLocation(data.location);
-      setStartDate(data.startDate);
-      setEndDate(data.endDate);
-      setPoster(data.poster);
-    }
+    // console.log(performanceId);
+    console.log("selectedDate:", selectedDate);
+    console.log("selectedTime:", selectedTime);
+    const fetchDetail = async () => {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const response = await fetch(`/api/contents/detail`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ performanceId }),
+        });
 
-    fetchData();
-  }, []);
+        if (response.ok) {
+          const jsonData: PerformanceDetailResponseDto = await response.json();
+          setData(jsonData);
+          console.log("상세 데이터:", jsonData);
+          setTitle(jsonData.title);
+          setLocation(jsonData.location);
+          setStartDate(jsonData.startDate);
+          setEndDate(jsonData.endDate);
+          setPoster(jsonData.posterUrl);
+          setArtist(jsonData.artists);
+          setGenre(jsonData.genre);
+          setRunningTime(jsonData.runningTime);
+        } else {
+          console.error("요청 실패: ", response.status);
+        }
+      } catch (error) {
+        console.error("에러: ", error);
+      }
+    };
+
+    if (performanceId) {
+      // console.log("performanceId:", performanceId);
+      fetchDetail();
+    }
+  }, [performanceId, selectedDate, selectedTime]);
+
+  const handleDateClick = (date: string) => {
+    setSelectedDate(date);
+    setSelectedTime(null); // 날짜 바꾸면 시간 초기화
+    // console.log("selectedDate:", selectedDate);
+  };
+
+  const handleTimeClick = (time: string) => {
+    setSelectedTime(time);
+    // console.log("selectedTime:", selectedTime);
+  };
+
+  const dateList = performanceDetail?.scheduleWithSeatsDtos?.map((dto) => {
+    const date = new Date(dto.schedule.performanceDate);
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      weekday: "long",
+    });
+  });
+
+  // timeList 생성 부분에서 startTime을 변환
+  const timeList = performanceDetail?.scheduleWithSeatsDtos
+    .filter((dto) => {
+      const date = new Date(dto.schedule.performanceDate);
+      const formatted = date.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long",
+      });
+      return formatted === selectedDate;
+    })
+    .map((dto) => {
+      const startTime = dto.schedule.startTime as string;
+      if (typeof startTime === "string") {
+        const [hour, minute] = startTime.split(":");
+        return `${hour}시 ${minute}분`; // HH:MM 형식으로 변환
+      }
+      return "";
+    })
+    .filter((time) => time !== ""); // 빈 문자열 제거
+
+  // 선택한 날짜 + 시간에 따른 좌석 데이터
+  const selectedSeats =
+    performanceDetail?.scheduleWithSeatsDtos.find((dto) => {
+      const date = new Date(dto.schedule.performanceDate);
+      const formattedDate = date.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long",
+      });
+      const startTime = String(dto.schedule.startTime);
+      const [hour, minute] = startTime.split(":");
+      const formattedTime = `${hour}시 ${minute}분`;
+      return formattedDate === selectedDate && formattedTime === selectedTime;
+    })?.seats || [];
 
   return (
     <div className="w-full h-screen flex flex-col justify-center items-center ">
       <div className="flex flex-row justify-center mt-24 2xl:mt-10 w-full max-w-4xl bg-white p-6 rounded-md shadow-md">
-        <img src={poster || "/images/peak.jpeg"} className="w-46 h-65" />
+        {/* <img src={poster || "/images/peak.jpeg"} /> */}
+        <img
+          src={`http://localhost:8080/performance_poster/${
+            poster.split("/performance_poster")[1]
+          }`}
+          alt="poster"
+          className="w-46 h-65"
+        />
         <div className="flex flex-col gap-2 justify-center">
           <div>
             <h1 className="font-bold text-3xl text-center w-full">
@@ -57,13 +177,11 @@ export default function DetailTable() {
               </div>
 
               <div className="text-left space-y-3">
-                <p className="text-md">{location || "샤롯데시어터"}</p>
+                <p className="text-md">{location}</p>
                 <p className="text-md w-60">
-                  {startDate
-                    ? `${startDate} - ${endDate}`
-                    : "2025.05.30 - 2025.06.01"}
+                  {startDate} - {endDate}
                 </p>
-                <p className="text-md">150분</p>
+                <p className="text-md">{runningTime}분</p>
               </div>
             </div>
 
@@ -76,10 +194,8 @@ export default function DetailTable() {
               </div>
 
               <div className="text-left space-y-1">
-                <p className="text-md font-semibold">페스티벌</p>
-                <p className="text-md font-semibold">
-                  윤도현 밴드, 하이라이트, 데이식스, nct127
-                </p>
+                <p className="text-md font-semibold">{genre}</p>
+                <p className="text-md font-semibold">{artist}</p>
                 <p className="text-md font-semibold"></p>
                 <p className="text-md font-semibold"></p>
               </div>
@@ -98,23 +214,23 @@ export default function DetailTable() {
               <dt className="tit_process tit_date_choice text-lg font-bold mb-4">
                 날짜 선택
               </dt>
-              <dd className="sorting flex space-x-4 mb-4">
-                <button className="type_calendar bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                  캘린더 보기
-                </button>
-                <button className="type_list bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
-                  리스트 보기
-                </button>
-              </dd>
+
               <dd className="cont_process">
                 <div className="box_type_list" id="box_list_date">
                   <ul className="list_type space-y-2" id="list_date">
-                    <li className="p-2 bg-white rounded-lg hover:bg-gray-100">
-                      2025년 05월 24일 토요일
-                    </li>
-                    <li className="p-2 bg-white rounded-lg hover:bg-gray-100">
-                      2025년 05월 25일 일요일
-                    </li>
+                    {(dateList ?? []).map((date, index) => (
+                      <li
+                        key={index}
+                        className={`p-2 rounded-lg hover:bg-gray-100 ${
+                          selectedDate === date
+                            ? "bg-blue-500 text-white"
+                            : "bg-white"
+                        }`}
+                        onClick={() => handleDateClick(date)}
+                      >
+                        {date}
+                      </li>
+                    ))}
                   </ul>
                 </div>
                 <div className="box_type_calendar hidden" id="box_calendar">
@@ -129,9 +245,6 @@ export default function DetailTable() {
                       다음
                     </button>
                   </div>
-                  <table className="calendar w-full border-collapse bg-white">
-                    {/* 캘린더 테이블 구성 필요 */}
-                  </table>
                 </div>
               </dd>
             </dl>
@@ -144,9 +257,19 @@ export default function DetailTable() {
               </dt>
               <dd className="cont_process">
                 <ul className="list_time space-y-2">
-                  <li className="p-2 bg-white rounded-lg hover:bg-gray-100">
-                    18시 00분
-                  </li>
+                  {(timeList ?? []).map((time, index) => (
+                    <li
+                      key={index}
+                      className={`p-2 rounded-lg hover:bg-gray-100 ${
+                        selectedTime === time
+                          ? "bg-blue-500 text-white"
+                          : "bg-white"
+                      }`}
+                      onClick={() => handleTimeClick(time)}
+                    >
+                      {time}
+                    </li>
+                  ))}
                 </ul>
               </dd>
             </dl>
@@ -158,24 +281,20 @@ export default function DetailTable() {
                 <div className="box_type_list">
                   <p className="mb-2 font-semibold">선택한 회차별 좌석 현황</p>
                   <ul className="list_seat space-y-2">
-                    <li className="flex justify-between items-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                      <span className="text-md">VIP</span>
-                      <strong className="text-md text-red-500">
-                        220,000원
-                      </strong>
-                    </li>
-                    <li className="flex justify-between items-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                      <span className="text-md">R석</span>
-                      <strong className="text-md text-red-500">
-                        154,000원
-                      </strong>
-                    </li>
-                    <li className="flex justify-between items-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
-                      <span className="text-md">S석</span>
-                      <strong className="text-md text-red-500">
-                        143,000원
-                      </strong>
-                    </li>
+                    {selectedSeats.map((seat, index) => (
+                      <li
+                        key={index}
+                        className="flex justify-between items-center p-2 bg-gray-100 rounded-lg hover:bg-gray-200"
+                      >
+                        <span className="text-md">{seat.seatType}</span>
+                        <span className="text-md text-gray-500">
+                          {seat.remainingSeats}석
+                        </span>
+                        <strong className="text-md text-red-500">
+                          {seat.price.toLocaleString()}원
+                        </strong>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </dd>

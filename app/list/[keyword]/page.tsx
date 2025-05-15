@@ -14,9 +14,10 @@ export default async function ListPage({
 
   return (
     <div className="w-full min-h-screen flex flex-col">
+      {/* <div className="fixed top-0 left-0 w-full z-50"> */}
       <HomeHeader />
-
-      <div className="flex-1 flex flex-col mt-20">
+      {/* </div> */}
+      <div className="flex-1 flex flex-col mt-28">
         <SearchList keyword={keyword} isGenre={isGenre} />
       </div>
     </div>
